@@ -1,9 +1,9 @@
 <div [formGroup]="categoryFormGroup">
-  <md-select placeholder="category1" formControlName="first">
+  <md-select formControlName="first" placeholder="category1">
     <md-option *ngFor="let c of categoryList1" [value]="c.id">{{ c.text }}</md-option>
   </md-select>
 
-  <md-select placeholder="category2" formControlName="second">
+  <md-select *ngIf="!categoryFormGroup.get('second').disabled" formControlName="second" placeholder="category2">
     <md-option *ngFor="let c of categoryList2" [value]="c.id">{{ c.text }}</md-option>
   </md-select>
 </div>

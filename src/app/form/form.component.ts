@@ -19,12 +19,31 @@ export class FormComponent implements OnInit {
   ) {
     this.myForm = this.fb.group({
       category: this.fb.group({
-        first: ['4', Validators.required],
-        second: ['2', Validators.required],
+        first: ['', Validators.required],
+        second: ['', Validators.required],
       }),
       media: this.fb.group({
-        media: [['11', '12'], Validators.required],
+        media: [[], Validators.required],
+      }),
+      customInputs: this.fb.array([])
+    });
+
+    this.myForm.setControl('customInputs', this.fb.array([
+      this.fb.group({
+        type: 'x_y',
+        x: ['', Validators.required],
+        y: ['', Validators.required]
       })
+    ]));
+
+    this.myForm.patchValue({
+      category: {
+        first: '4',
+        second: '2'
+      },
+      media: {
+        media: ['11', '12']
+      }
     });
   }
 
@@ -33,6 +52,10 @@ export class FormComponent implements OnInit {
       console.log('valueChanges', this.myForm.value);
       console.log('valid', this.myForm.valid);
     });
+  }
+
+  onSubmit() {
+    console.log('onSubmit');
   }
 }
 

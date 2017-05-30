@@ -12,6 +12,8 @@ import { FormComponent } from './form/form.component';
 import { MediaComponent } from './form/media/media.component';
 import { Select2Component } from './select2/select2.component';
 import { CategoryComponent } from './form/category/category.component';
+import { CustomInputsComponent } from './form/custom-inputs/custom-inputs.component';
+import { XYComponent } from './form/custom-inputs/x-y/x-y.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,9 @@ import { CategoryComponent } from './form/category/category.component';
     FormComponent,
     MediaComponent,
     Select2Component,
-    CategoryComponent
+    CategoryComponent,
+    CustomInputsComponent,
+    XYComponent
   ],
   imports: [
     BrowserModule,

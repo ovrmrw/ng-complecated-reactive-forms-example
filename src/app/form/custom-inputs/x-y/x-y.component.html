@@ -1,0 +1,11 @@
+<div [formGroup]="customInputFormGroup">
+  <div materialize class="input-field col s6">
+    <input formControlName="x" type="text" [id]="'custom-input-x-' + i" #input1>
+    <label [for]="input1.id">x</label>
+  </div>
+
+  <div materialize class="input-field col s6">
+    <input formControlName="y" type="text" [id]="'custom-input-y-' + i" #input2>
+    <label [for]="input2.id">y</label>
+  </div>
+</div>

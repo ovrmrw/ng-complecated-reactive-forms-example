@@ -1,8 +1,8 @@
 import { Component, OnInit, Input, Output } from '@angular/core';
-import { FormGroup, FormControl, AbstractControl } from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { FirebaseService } from '../../firebase/firebase.service';
 import { SelectModel } from '../../models';
-import { BehaviorSubject } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 
 @Component({
   selector: 'app-category',
@@ -15,24 +15,37 @@ export class CategoryComponent implements OnInit {
   categoryList1: SelectModel[] = [];
   categoryList2: SelectModel[] = [];
 
+  get categoryFirstControl(): FormControl {
+    return this.categoryFormGroup.get('first') as FormControl;
+  };
+  get categorySecondControl(): FormControl {
+    return this.categoryFormGroup.get('second') as FormControl;
+  }
+
   constructor(
     private firebase: FirebaseService,
   ) { }
 
   ngOnInit() {
+    this.manageInitialList();
+    this.manageValueChanges();
+    this.manageStatusChanges();
+  }
+
+  manageInitialList(): void {
     this.firebase.searchCategory().then(categoryList => {
       this.categoryList1 = categoryList;
     });
 
-    const categorySecond = getControlValue<string>(this.categoryFormGroup.get('second'));
-    if (categorySecond) {
+    if (this.categorySecondControl.value) {
       this.firebase.searchCategory().then(categoryList => {
         this.categoryList2 = categoryList;
       });
     }
+  }
 
-    const categoryFirstControl = this.categoryFormGroup.get('first') as FormControl;
-    categoryFirstControl.valueChanges.subscribe(value => {
+  manageValueChanges(): void {
+    this.categoryFirstControl.valueChanges.subscribe(value => {
       console.log('categoryFirst is changed.');
       this.categoryFormGroup.patchValue({
         second: ''
@@ -42,24 +55,16 @@ export class CategoryComponent implements OnInit {
       });
     });
   }
-}
 
-
-function getControlValue<T>(control: AbstractControl | null): T {
-  if (control) {
-    return control.value;
-  } else {
-    throw new Error(control + ' is not found.');
-  }
-}
-
-function getControlSubject(control: AbstractControl | null): BehaviorSubject<any> {
-  let result: BehaviorSubject<any>;
-  if (control) {
-    result = new BehaviorSubject(control.value);
-    control.valueChanges.subscribe(value => result.next(value));
-    return result;
-  } else {
-    throw new Error(control + ' is not found.');
+  manageStatusChanges(): void {
+    Observable.of(this.categoryFirstControl.valid)
+      .merge(this.categoryFirstControl.statusChanges.map(s => s === 'VALID'))
+      .subscribe(valid => {
+        if (valid) {
+          this.categorySecondControl.enable();
+        } else {
+          this.categorySecondControl.disable();
+        }
+      });
   }
 }

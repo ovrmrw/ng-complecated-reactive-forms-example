@@ -1,0 +1,14 @@
+<div [formGroup]="hostFormGroup">
+  <div formArrayName="customInputs">
+    <div *ngIf="!hostFormGroup.get('customInputs').disabled">
+      <div *ngFor="let custom of customInputs.controls; let i=index" [formGroupName]="i">
+        {{ custom.value | json }}
+        <div [ngSwitch]="custom.value.type">
+          <div *ngSwitchCase="'x_y'">
+            <app-x-y [customInputFormGroup]="custom" [i]="i"></app-x-y>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
