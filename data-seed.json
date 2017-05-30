@@ -1,0 +1,102 @@
+{
+  "media": [
+    {
+      "id": "1",
+      "text": "Hoge"
+    },
+    {
+      "id": "2",
+      "text": "Foo"
+    },
+    {
+      "id": "3",
+      "text": "Bar"
+    },
+    {
+      "id": "4",
+      "text": "Baz"
+    },
+    {
+      "id": "11",
+      "text": "Hoge2"
+    },
+    {
+      "id": "12",
+      "text": "Foo2"
+    },
+    {
+      "id": "13",
+      "text": "Bar2"
+    },
+    {
+      "id": "14",
+      "text": "Baz2"
+    },
+    {
+      "id": "21",
+      "text": "Hoge3"
+    },
+    {
+      "id": "22",
+      "text": "Foo3"
+    },
+    {
+      "id": "23",
+      "text": "Bar3"
+    },
+    {
+      "id": "24",
+      "text": "Baz3"
+    }
+  ],
+  "category": [
+    {
+      "id": "1",
+      "text": "Hoge"
+    },
+    {
+      "id": "2",
+      "text": "Foo"
+    },
+    {
+      "id": "3",
+      "text": "Bar"
+    },
+    {
+      "id": "4",
+      "text": "Baz"
+    },
+    {
+      "id": "11",
+      "text": "Hoge2"
+    },
+    {
+      "id": "12",
+      "text": "Foo2"
+    },
+    {
+      "id": "13",
+      "text": "Bar2"
+    },
+    {
+      "id": "14",
+      "text": "Baz2"
+    },
+    {
+      "id": "21",
+      "text": "Hoge3"
+    },
+    {
+      "id": "22",
+      "text": "Foo3"
+    },
+    {
+      "id": "23",
+      "text": "Bar3"
+    },
+    {
+      "id": "24",
+      "text": "Baz3"
+    }
+  ]
+}

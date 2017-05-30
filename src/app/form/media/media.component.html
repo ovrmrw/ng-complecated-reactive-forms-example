@@ -1,0 +1,5 @@
+<div [formGroup]="mediaFormGroup">
+  <md-select placeholder="media" formControlName="media" [multiple]="true" [disabled]="!categoryFormGroup.get('second').valid">
+    <md-option *ngFor="let m of mediaList" [value]="m.id">{{ m.text }}</md-option>
+  </md-select>
+</div>
