@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import { FirebaseService } from '../firebase/firebase.service';
 import { SelectModel } from '../models';
 import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import * as lodash from 'lodash';
 
 @Component({
   selector: 'app-form',
@@ -12,10 +13,11 @@ import { Observable, BehaviorSubject } from 'rxjs/Rx';
 export class FormComponent implements OnInit {
 
   myForm: FormGroup;
+  currentFormValue: any;
 
   constructor(
     private fb: FormBuilder,
-    // private firebase: FirebaseService,
+    // public firebase: FirebaseService,
   ) {
     this.myForm = this.fb.group({
       category: this.fb.group({
@@ -24,6 +26,7 @@ export class FormComponent implements OnInit {
       }),
       media: this.fb.group({
         media: [[], Validators.required],
+        select2: [['1']]
       }),
       customInputs: this.fb.array([])
     });
@@ -51,6 +54,7 @@ export class FormComponent implements OnInit {
     this.myForm.valueChanges.subscribe(() => {
       console.log('valueChanges', this.myForm.value);
       console.log('valid', this.myForm.valid);
+      this.currentFormValue = lodash.cloneDeep(this.myForm.value);
     });
   }
 

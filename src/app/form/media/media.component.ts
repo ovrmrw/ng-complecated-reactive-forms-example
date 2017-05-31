@@ -19,7 +19,7 @@ export class MediaComponent implements OnInit {
   private mediaControl: FormControl;
 
   constructor(
-    private firebase: FirebaseService,
+    public firebase: FirebaseService,
   ) { }
 
   ngOnInit() {

@@ -2,4 +2,6 @@
   <md-select *ngIf="!mediaFormGroup.get('media').disabled" formControlName="media" placeholder="media" [multiple]="true">
     <md-option *ngFor="let m of mediaList" [value]="m.id">{{ m.text }}</md-option>
   </md-select>
+
+  <app-select2 formControlName="select2" [multiple]="true" placeholder="文字を入力" [ajaxSearchFunction]="firebase.searchMedia" [ajaxGetFunction]="firebase.getMedia"></app-select2>
 </div>

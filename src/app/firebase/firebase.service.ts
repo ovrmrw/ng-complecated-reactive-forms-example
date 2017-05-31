@@ -18,19 +18,19 @@ export class FirebaseService {
     });
   }
 
-  searchMedia(keyword?: string): Promise<SelectModel[]> {
+  searchMedia = (keyword?: string): Promise<SelectModel[]> => {
     return this.searcher('media', keyword) as Promise<SelectModel[]>;
   }
 
-  getMedia(ids?: string[] | string): Promise<SelectModel[]> {
+  getMedia = (ids?: string[] | string): Promise<SelectModel[]> => {
     return this.getter('media', ids) as Promise<SelectModel[]>;
   }
 
-  searchCategory(keyword?: string): Promise<SelectModel[]> {
+  searchCategory = (keyword?: string): Promise<SelectModel[]> => {
     return this.searcher('category', keyword) as Promise<SelectModel[]>;
   }
 
-  getCategory(ids?: string[] | string): Promise<SelectModel[]> {
+  getCategory = (ids?: string[] | string): Promise<SelectModel[]> => {
     return this.getter('category', ids) as Promise<SelectModel[]>;
   }
 

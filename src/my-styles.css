@@ -1,0 +1,25 @@
+
+.taskdriver-select {
+  /*height: 1rem !important;*/
+  /*margin: 0 !important;*/
+  font-size: 1rem !important;
+}
+
+.taskdriver-chip {
+  font-size: 1rem;
+  /*color:#26a69a;*/
+}
+
+input[type=search].taskdriver-select {
+    border-bottom: 0px solid #26a69a;
+    box-shadow: unset;
+}
+
+input[type=search]:focus:not([readonly]).taskdriver-select {
+    border-bottom: 0px solid #26a69a;
+    box-shadow: unset;
+}
+
+.select-dropdown{
+    overflow-y: scroll !important;
+}
