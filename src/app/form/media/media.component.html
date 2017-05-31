@@ -1,7 +1,14 @@
 <div [formGroup]="mediaFormGroup">
-  <md-select *ngIf="!mediaFormGroup.get('media').disabled" formControlName="media" placeholder="media" [multiple]="true">
-    <md-option *ngFor="let m of mediaList" [value]="m.id">{{ m.text }}</md-option>
-  </md-select>
+  <div class="row">
+    <div class="col s6">
+      <md-select *ngIf="!mediaFormGroup.get('media').disabled" formControlName="media" placeholder="media" [multiple]="true">
+        <md-option *ngFor="let m of mediaList" [value]="m.id">{{ m.text }}</md-option>
+      </md-select>
+    </div>
 
-  <app-select2 formControlName="select2" [multiple]="true" placeholder="文字を入力" [ajaxSearchFunction]="firebase.searchMedia" [ajaxGetFunction]="firebase.getMedia"></app-select2>
+    <div class="col s6">
+      <app-select2 *ngIf="!mediaFormGroup.get('select2').disabled" formControlName="select2" [multiple]="true" placeholder="文字を入力"
+        [ajaxSearchFunction]="firebase.searchMedia" [ajaxGetFunction]="firebase.getMedia"></app-select2>
+    </div>
+  </div>
 </div>

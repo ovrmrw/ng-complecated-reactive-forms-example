@@ -17,6 +17,7 @@ export class MediaComponent implements OnInit {
 
   private categorySecondControl: FormControl;
   private mediaControl: FormControl;
+  private select2Control: FormControl;
 
   constructor(
     public firebase: FirebaseService,
@@ -25,6 +26,7 @@ export class MediaComponent implements OnInit {
   ngOnInit() {
     this.categorySecondControl = this.categoryFormGroup.get('second') as FormControl;
     this.mediaControl = this.mediaFormGroup.get('media') as FormControl;
+    this.select2Control = this.mediaFormGroup.get('select2') as FormControl;
 
     this.manageInitialList();
     this.manageValueChanges();
@@ -32,9 +34,11 @@ export class MediaComponent implements OnInit {
   }
 
   manageInitialList(): void {
+    console.log('mediaControl', this.mediaControl);
     if (this.mediaControl.value) {
       this.firebase.searchMedia().then(mediaList => {
         this.mediaList = mediaList;
+        console.log(this.mediaList);
       });
     }
   }
@@ -44,7 +48,8 @@ export class MediaComponent implements OnInit {
       console.log('categorySecond is changed.');
       // mediaをリセットする。
       this.mediaFormGroup.patchValue({
-        media: []
+        media: [],
+        select2: [],
       });
       // mediaのリストを再度取得する。
       this.firebase.searchMedia().then(mediaList => {
@@ -59,8 +64,10 @@ export class MediaComponent implements OnInit {
       .subscribe(valid => {
         if (valid) {
           this.mediaControl.enable();
+          this.select2Control.enable();
         } else {
           this.mediaControl.disable();
+          this.select2Control.disable();
         }
       });
   }

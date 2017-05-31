@@ -16,59 +16,39 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   styleUrls: ['./select2.component.css'],
   providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR]
 })
-export class Select2Component implements OnInit, OnChanges, ControlValueAccessor {
+export class Select2Component implements OnInit, OnDestroy, ControlValueAccessor {
 
-  @Output() change = new EventEmitter();
-  @Output() open = new EventEmitter();
-  @Output() close = new EventEmitter();
-  @Output() select = new EventEmitter<GenericSelect2Model>();
-  @Output() unselect = new EventEmitter<GenericSelect2Model>();
-
+  @Output() change = new EventEmitter<string[]>();
   @Input() options: {} = {};
-  @Input() data: SelectModel[] = [{ id: '1', text: 'Hoge' }];
-  @Input() initialIds: string[] = [];
-  @Input() transport: (params, success: Function, failure: Function) => void;
   @Input() url = '';
   @Input() multiple = false;
   @Input() placeholder = '';
+  @Input() minimumInputLength = 0;
   @Input() maximumSelectionLength = 999;
-  @Input() ajaxSearchFunction: (keyword?: string) => Promise<any>;
-  @Input() ajaxGetFunction: (ids?: string[]) => Promise<any>;
+  @Input() ajaxSearchFunction: (keyword?: string) => Promise<SelectModel[]>;
+  @Input() ajaxGetFunction: (ids?: string[]) => Promise<SelectModel[]>;
 
   $select: any;
-  isCreated = false;
+  data: SelectModel[] = [];
+
+  onChangeValue: (newValue: string[]) => void = (v) => { };
 
   private _controlValue: string[];
   get controlValue(): string[] {
     return this._controlValue;
   }
-  set controlValue(value: string[]) {
-    if (value !== undefined) {
-      this._controlValue = value instanceof Array ? value : [value];
-      console.log('set controlValue', this._controlValue, this.onChangeValue);
-      if (this.onChangeValue) {
-        this.onChangeValue(this._controlValue);
-      } else {
-        setTimeout(() => {
-          console.log('onChangeValue', this.onChangeValue);
-          this.onChangeValue(this._controlValue);
-        });
-      }
-    }
-  }
-
-  onChangeValue: (newValue: any) => void | undefined;
 
   constructor(
     private el: ElementRef,
-    private firebase: FirebaseService,
+    // private firebase: FirebaseService,
   ) { }
 
+  // formControlNameのvalueが変わる度に発火する。
   writeValue(value: string[]) {
-    this._controlValue = value;
-    setTimeout(() => {
-      this.onChangeValue(this._controlValue);
-    });
+    this._controlValue = value != null ? value : [];
+    if (this.$select) {
+      this.$select.val(this._controlValue).trigger('change');
+    }
   }
 
   registerOnChange(fn: (newValue: any) => void) {
@@ -79,96 +59,78 @@ export class Select2Component implements OnInit, OnChanges, ControlValueAccessor
     console.log('registerOnTouched', fn);
   }
 
-  ngOnChanges(changes: { initialIds: SimpleChange }) {
-    // console.log('control', this.control)
-    console.log('innverValue', this._controlValue);
-    // this.initializeSelect2();
-  }
-
   ngOnInit() {
-    console.log('innverValue', this._controlValue);
-    this.initializeSelect2();
-    setTimeout(() => {
-      this.$select.val(this.controlValue).trigger('change');
-    }, 500);
-  }
+    jQuery(this.el.nativeElement).ready(async () => {
+      let initialData: SelectModel[] = [];
 
-  initializeSelect2() {
-    if (!this.isCreated) {
-      jQuery(this.el.nativeElement).ready(() => {
-        this.createSelect2();
-      });
-      this.isCreated = true;
-    }
+      if (this.controlValue && this.controlValue.length && this.controlValue instanceof Array) {
+        const ids: string[] = this.controlValue;
+        initialData = await this.ajaxGetFunction(ids);
+      }
 
-    // Select2作成済みなら一旦削除する。
-    if (this.isCreated && this.$select && this.$select.select2) {
-      console.log('destroy');
-      this.$select.select2('destroy');
-      this.createSelect2();
-    }
-  }
-
-  createSelect2() {
-    const _selectElement = this.el.nativeElement.querySelector('select');
-    this.$select = jQuery(_selectElement);
-    this.$select
-      .select2({
-        ...this.options,
-        placeholder: this.placeholder,
-        multiple: this.multiple,
-        data: this.data,
-        // minimumInputLength: 1,
-        maximumSelectionLength: this.maximumSelectionLength,
-        // minimumResultsForSearch: Infinity,
-        ajax: {
-          processResults: function (data, params) {
-            console.log('processResults', data, params);
-            return {
-              results: data
-            };
-          },
-          transport: (params, success, failed) => {
-            console.log('transport.params', params);
-            console.log('transport.success', success);
-            console.log('transport.failed', failed);
-            console.log('term', params.data.term);
-            this.ajaxSearchFunction(params.data.term)
-              .then(result => success(result))
-              .catch(err => failed());
-          },
-          cache: true
-        }
-      })
-      .on('change', event => {
-        const ids: string[] = this.$select.val();
-        if (ids && ids.length) {
+      const _selectElement = this.el.nativeElement.querySelector('select');
+      this.$select = jQuery(_selectElement);
+      this.$select
+        .select2({
+          ...this.options,
+          data: initialData,
+          placeholder: this.placeholder,
+          multiple: this.multiple,
+          minimumInputLength: this.minimumInputLength,
+          maximumSelectionLength: this.maximumSelectionLength,
+          ajax: {
+            processResults: (data, params) => {
+              return {
+                results: data
+              };
+            },
+            transport: (params, success, failure) => {
+              const keyword: string = params.data.term;
+              this.ajaxSearchFunction(keyword)
+                .then(success)
+                .catch(failure);
+            },
+            cache: true
+          }
+        })
+        .on('change', event => {
+          const id: string[] | string = this.$select.val();
+          const ids: string[] = id != null ? [] :
+            id instanceof Array ? id : [id];
           this.onChangeValue(ids);
+          this.change.emit(ids);
           this.hookCss();
-        }
-      });
-    this.hookCss();
-  }
+        });
 
-  hookCss() {
-    setTimeout(() => {
-      const _inputNodes: HTMLInputElement[] = Array.from(this.el.nativeElement.querySelectorAll('input.select2-search__field') as any[]);
-      _inputNodes.forEach(node => {
-        if (!node.classList.contains('taskdriver-select')) {
-          node.classList.add('taskdriver-select');
-        }
-      });
-
-      const _choiceNodes: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll('li.select2-selection__choice') as any[]);
-      _choiceNodes.forEach(node => {
-        if (!node.classList.contains('taskdriver-chip')) {
-          node.classList.add('chip');
-          node.classList.add('taskdriver-chip');
-        }
-      });
+      this.$select.val(this.controlValue).trigger('change');
+      this.hookCss();
     });
   }
 
+  ngOnDestroy() {
+    if (this.$select) {
+      this.$select.select2('destroy');
+    }
+  }
+
+  hookCss() {
+    // setTimeout(() => {
+    const _inputNodes: HTMLInputElement[] = Array.from(this.el.nativeElement.querySelectorAll('input.select2-search__field') as any[]);
+    _inputNodes.forEach(node => {
+      if (!node.classList.contains('taskdriver-select')) {
+        node.classList.add('taskdriver-select');
+      }
+    });
+
+    const _choiceNodes: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll('li.select2-selection__choice') as any[]);
+    _choiceNodes.forEach(node => {
+      if (!node.classList.contains('taskdriver-chip')) {
+        node.classList.add('chip');
+        node.classList.add('taskdriver-chip');
+      }
+    });
+    // });
+  }
 }
 
 

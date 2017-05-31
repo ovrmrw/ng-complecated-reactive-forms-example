@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { FirebaseService } from '../firebase/firebase.service';
 import { SelectModel } from '../models';
@@ -13,10 +13,10 @@ import * as lodash from 'lodash';
 export class FormComponent implements OnInit {
 
   myForm: FormGroup;
-  currentFormValue: any;
 
   constructor(
     private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
     // public firebase: FirebaseService,
   ) {
     this.myForm = this.fb.group({
@@ -25,8 +25,8 @@ export class FormComponent implements OnInit {
         second: ['', Validators.required],
       }),
       media: this.fb.group({
-        media: [[], Validators.required],
-        select2: [['1']]
+        media: [[''], Validators.required],
+        select2: [[''], Validators.required]
       }),
       customInputs: this.fb.array([])
     });
@@ -45,7 +45,8 @@ export class FormComponent implements OnInit {
         second: '2'
       },
       media: {
-        media: ['11', '12']
+        media: ['11', '12'],
+        select2: ['2', '3']
       }
     });
   }
@@ -54,7 +55,7 @@ export class FormComponent implements OnInit {
     this.myForm.valueChanges.subscribe(() => {
       console.log('valueChanges', this.myForm.value);
       console.log('valid', this.myForm.valid);
-      this.currentFormValue = lodash.cloneDeep(this.myForm.value);
+      // this.cd.detectChanges();
     });
   }
 
