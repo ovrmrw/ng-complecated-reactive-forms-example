@@ -1,0 +1,19 @@
+li.taskdriver-select2-chip__override {
+  font-size: 1rem !important;
+  border-radius: 15px !important;
+}
+
+input.taskdriver-select2-search__override {
+  font-size: 1rem !important;
+  height: inherit !important;
+  margin: inherit !important;
+  transition: none !important;
+}
+
+input.taskdriver-select2-search-multiple__override {
+  font-size: 1rem !important;
+  margin-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: unset !important;
+  transition: none !important;
+}

@@ -1,8 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, ElementRef, OnDestroy, ViewEncapsulation, OnChanges, SimpleChange, forwardRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, OnDestroy, ViewEncapsulation, forwardRef } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 declare const jQuery: any;
-import { ControlValueAccessor, NgControl, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { GenericSelect2Model, PpApiSelect2GenericResultModel } from '../models';
-import { FirebaseService } from '../firebase/firebase.service';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -14,7 +12,8 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   selector: 'app-select2',
   templateUrl: './select2.component.html',
   styleUrls: ['./select2.component.css'],
-  providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR]
+  providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
+  encapsulation: ViewEncapsulation.None,
 })
 export class Select2Component implements OnInit, OnDestroy, ControlValueAccessor {
 
@@ -28,48 +27,46 @@ export class Select2Component implements OnInit, OnDestroy, ControlValueAccessor
   @Input() ajaxSearchFunction: (keyword?: string) => Promise<SelectModel[]>;
   @Input() ajaxGetFunction: (ids?: string[]) => Promise<SelectModel[]>;
 
-  $select: any;
-  data: SelectModel[] = [];
-
-  onChangeValue: (newValue: string[]) => void = (v) => { };
+  private $select: any; // jQuery object
 
   private _controlValue: string[];
   get controlValue(): string[] {
     return this._controlValue;
   }
 
+  private onChangeValue: (newValue: string[]) => void = (v) => { };
+
   constructor(
     private el: ElementRef,
-    // private firebase: FirebaseService,
   ) { }
 
-  // formControlNameのvalueが変わる度に発火する。
-  writeValue(value: string[]) {
-    this._controlValue = value != null ? value : [];
+  // formControlNameのvalueが変わる度に発火する。this._controlValueはここでしか変更されない。
+  writeValue(value: string[] | string) {
+    this._controlValue = value == null ? [] :
+      value instanceof Array ? value : [value];
     if (this.$select) {
-      this.$select.val(this._controlValue).trigger('change');
+      this.$select.val(this.controlValue).trigger('change');
     }
   }
 
   registerOnChange(fn: (newValue: any) => void) {
-    console.log('registerOnChange', fn);
+    // console.log('registerOnChange', fn);
     this.onChangeValue = fn;
   }
   registerOnTouched(fn: () => boolean) {
-    console.log('registerOnTouched', fn);
+    // console.log('registerOnTouched', fn);
   }
 
   ngOnInit() {
     jQuery(this.el.nativeElement).ready(async () => {
       let initialData: SelectModel[] = [];
 
-      if (this.controlValue && this.controlValue.length && this.controlValue instanceof Array) {
-        const ids: string[] = this.controlValue;
-        initialData = await this.ajaxGetFunction(ids);
+      if (this.controlValue && this.controlValue.length) {
+        const _ids: string[] = this.controlValue;
+        initialData = await this.ajaxGetFunction(_ids);
       }
 
-      const _selectElement = this.el.nativeElement.querySelector('select');
-      this.$select = jQuery(_selectElement);
+      this.$select = jQuery(this.el.nativeElement.querySelector('select'));
       this.$select
         .select2({
           ...this.options,
@@ -85,51 +82,52 @@ export class Select2Component implements OnInit, OnDestroy, ControlValueAccessor
               };
             },
             transport: (params, success, failure) => {
-              const keyword: string = params.data.term;
-              this.ajaxSearchFunction(keyword)
+              const _keyword: string = params.data.term;
+              this.ajaxSearchFunction(_keyword)
                 .then(success)
                 .catch(failure);
             },
-            cache: true
+            cache: true,
           }
         })
         .on('change', event => {
-          const id: string[] | string = this.$select.val();
-          const ids: string[] = id != null ? [] :
-            id instanceof Array ? id : [id];
-          this.onChangeValue(ids);
-          this.change.emit(ids);
-          this.hookCss();
+          const _ids: string[] = this.$select.val();
+          this.onChangeValue(_ids);
+          this.change.emit(_ids);
+          this.overrideStyles();
         });
 
       this.$select.val(this.controlValue).trigger('change');
-      this.hookCss();
+      this.overrideStyles();
     });
   }
 
   ngOnDestroy() {
+    // OnDestroyのタイミングでSelect2のオブジェクトを破棄する。
     if (this.$select) {
       this.$select.select2('destroy');
     }
   }
 
-  hookCss() {
-    // setTimeout(() => {
-    const _inputNodes: HTMLInputElement[] = Array.from(this.el.nativeElement.querySelectorAll('input.select2-search__field') as any[]);
-    _inputNodes.forEach(node => {
-      if (!node.classList.contains('taskdriver-select')) {
-        node.classList.add('taskdriver-select');
+  private overrideStyles() {
+    // Select2のinput[type=search]タグのスタイルを上書きする。
+    const _inputElements: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll('input.select2-search__field') as any[]);
+    _inputElements.forEach(element => {
+      if (!this.multiple && !element.classList.contains('taskdriver-select2-search__override')) { // single
+        element.classList.add('taskdriver-select2-search__override');
+      } else if (this.multiple && !element.classList.contains('taskdriver-select2-search-multiple__override')) { // multiple
+        element.classList.add('taskdriver-select2-search-multiple__override');
       }
     });
 
-    const _choiceNodes: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll('li.select2-selection__choice') as any[]);
-    _choiceNodes.forEach(node => {
-      if (!node.classList.contains('taskdriver-chip')) {
-        node.classList.add('chip');
-        node.classList.add('taskdriver-chip');
+    // Select2のmultipleのときの選択済みchipのスタイルを上書きする。
+    const _selectedElements: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll('li.select2-selection__choice') as any[]);
+    _selectedElements.forEach(element => {
+      if (!element.classList.contains('taskdriver-select2-chip__override')) {
+        element.classList.add('chip'); // materialize-css
+        element.classList.add('taskdriver-select2-chip__override');
       }
     });
-    // });
   }
 }
 
