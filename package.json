@@ -29,6 +29,7 @@
     "materialize-css": "^0.98.2",
     "rxjs": "^5.1.0",
     "select2": "4.0.2",
+    "setimmediate": "^1.0.5",
     "zone.js": "^0.8.4"
   },
   "devDependencies": {

@@ -19,6 +19,8 @@ export class MediaComponent implements OnInit {
   private mediaControl: FormControl;
   private select2Control: FormControl;
 
+  select2MediaValue = '';
+
   constructor(
     public firebase: FirebaseService,
   ) { }
@@ -70,5 +72,10 @@ export class MediaComponent implements OnInit {
           this.select2Control.disable();
         }
       });
+  }
+
+  changeMediaValue(event: string[]) {
+    // Select2から返されるvalueとngModelで使っているvalueが一致することを確認する。
+    console.log('media value from Select2:', event, 'select2MediaValue', this.select2MediaValue);
   }
 }
